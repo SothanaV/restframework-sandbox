@@ -1,4 +1,4 @@
 env/
 __pycache__/
-# postgresql_master_data/
+postgresql_master_data/
 .ipynb_checkpoints/
