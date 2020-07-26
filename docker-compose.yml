@@ -1,0 +1,99 @@
+version: '2'
+networks:
+    proxy:
+      external: true
+    internal:
+        external: false
+
+services:
+    db_master:
+        image: 'bitnami/postgresql:latest'
+        ports:
+            - '5432'
+        volumes:
+            - './postgresql_master_data:/bitnami/postgresql'
+        environment:
+            - POSTGRESQL_REPLICATION_MODE=master
+            - POSTGRESQL_REPLICATION_USER=repl_user
+            - POSTGRESQL_REPLICATION_PASSWORD=repl_password
+            - POSTGRESQL_USERNAME=my_user
+            - POSTGRESQL_PASSWORD=my_password
+            - POSTGRESQL_DATABASE=my_database
+        labels:
+            - traefik.enable=false
+        networks:
+            - internal
+          
+    db_slave_1:
+        image: 'bitnami/postgresql:latest'
+        ports:
+            - '5432'
+        depends_on:
+            - db_master
+        environment:
+            - POSTGRESQL_REPLICATION_MODE=slave
+            - POSTGRESQL_REPLICATION_USER=repl_user
+            - POSTGRESQL_REPLICATION_PASSWORD=repl_password
+            - POSTGRESQL_MASTER_HOST=db_master
+            - POSTGRESQL_PASSWORD=my_password
+            - POSTGRESQL_MASTER_PORT_NUMBER=5432
+        labels:
+            - traefik.enable=false
+        networks:
+            - internal
+    db_slave_2:
+        image: 'bitnami/postgresql:latest'
+        ports:
+            - '5432'
+        depends_on:
+            - db_master
+        environment:
+            - POSTGRESQL_REPLICATION_MODE=slave
+            - POSTGRESQL_REPLICATION_USER=repl_user
+            - POSTGRESQL_REPLICATION_PASSWORD=repl_password
+            - POSTGRESQL_MASTER_HOST=db_master
+            - POSTGRESQL_PASSWORD=my_password
+            - POSTGRESQL_MASTER_PORT_NUMBER=5432
+        labels:
+            - traefik.enable=false
+        networks:
+            - internal
+    api:
+        build: ./tutorial
+        command: sh runserver.sh
+        volumes: 
+            - ./tutorial/:/tutorial
+        ports: 
+            - 8000:8000
+        env_file: 
+            - .test.env
+        depends_on: 
+            - db_master
+            - db_slave_1
+            - db_slave_2
+        labels:
+            - "traefik.frontend.entryPoints=http"
+            - "traefik.frontend.rule=Host:varp.localhost;PathPrefix:/"
+            - traefik.backend=varp
+            - traefik.port=8000
+            - traefik.docker.network=proxy
+        networks:
+            - proxy
+            - internal
+    notebook:
+        build: ./tutorial
+        command: python manage.py shell_plus --notebook
+        volumes: 
+            - ./tutorial/:/tutorial
+        ports: 
+            - 8888:8888
+        env_file: 
+            - .test.env
+        depends_on: 
+            - db_master
+            - db_slave_1
+            - db_slave_2
+            - api
+        networks:
+            - proxy
+            - internal
