@@ -158,7 +158,7 @@ NOTEBOOK_ARGUMENTS = [
     "0.0.0.0",
     "--allow-root",
     "--no-browser",
-    "--notebook-dir=/VaRP",
+    "--notebook-dir=/tutorial",
 ]
 
 REPLICATED_VIEWS_OVERRIDES = {
