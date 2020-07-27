@@ -157,3 +157,23 @@ class SnippetDetail(mixins.RetrieveModelMixin,
 # class SnippetDetail(generics.RetrieveUpdateDestroyAPIView):
 #     queryset = Snippet.objects.all()
 #     serializer_class = SnippetSerializer
+
+from rest_framework.reverse import reverse
+
+
+@api_view(['GET'])
+def api_root(request, format=None):
+    return Response({
+        'users': reverse('user-list', request=request, format=format),
+        'snippets': reverse('snippet-list', request=request, format=format)
+    })
+
+from rest_framework import renderers
+
+class SnippetHighlight(generics.GenericAPIView):
+    queryset = Snippet.objects.all()
+    renderer_classes = [renderers.StaticHTMLRenderer]
+
+    def get(self, request, *args, **kwargs):
+        snippet = self.get_object()
+        return Response(snippet.highlighted)
