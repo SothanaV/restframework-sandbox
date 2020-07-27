@@ -163,6 +163,7 @@ NOTEBOOK_ARGUMENTS = [
 
 REPLICATED_VIEWS_OVERRIDES = {
     '/admin/*': 'master',
+    '/api-auth/logout/' : 'master',
 }
 
 
