@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User, Group
-from rest_framework import viewsets
-from .serializers import UserSerializer, GroupSerializer
-from rest_framework.permissions import IsAuthenticated
+from rest_framework import viewsets, generics
+from .serializers import UserSerializer, GroupSerializer, UserRegisterSerializer
+from rest_framework.permissions import IsAuthenticated, AllowAny
 # from .permissions import 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -17,6 +17,11 @@ class UserViewSet(viewsets.ModelViewSet):
         print(user, type(user))
         if user.is_authenticated:
             return User.objects.filter(username=user.username)
+
+class UserCreate(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserRegisterSerializer
+    permission_classes = (AllowAny, )
 
 
 class GroupViewSet(viewsets.ModelViewSet):
