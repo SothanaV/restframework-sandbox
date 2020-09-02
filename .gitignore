@@ -2,3 +2,4 @@ env/
 __pycache__/
 postgresql_master_data/
 .ipynb_checkpoints/
+*.pyc
